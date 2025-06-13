@@ -7,4 +7,8 @@ on:
 jobs:
   first-job:
     runs-on: ubuntu-latest
-
+    steps:
+    - name: test workflow
+      run: echo "demo workflow test"
+    - name: list files
+      run: ls -lart
