@@ -1,4 +1,4 @@
 name: demo workflow
 on: push
-  path: 
-    - demofile001
+  paths: 
+    - 'demofile001.txt'
