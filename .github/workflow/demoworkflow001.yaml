@@ -2,7 +2,7 @@ name: demo workflow
 on: 
   push:
     paths: 
-      - '/demofile001.txt'
+      - 'gitdemo001/demofile001.txt'
 
 jobs:
   first-job:
