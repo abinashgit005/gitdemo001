@@ -23,3 +23,4 @@ jobs:
     - name: git changed files
       run: |
         git fetch origin ${{ github.event.before }}
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.tfvars$' || echo "No .tfvars file changed"
