@@ -1,7 +1,7 @@
 name: demo workflow
 on:
   workflow_dispatch:
-    
+
   push:
     paths: 
       - '**/demofile001.txt'
@@ -16,3 +16,7 @@ jobs:
       run: echo "demo workflow test"
     - name: list files
       run: ls -lart
+    - name : commit details
+      run: |
+        echo "Commit SHA: ${{ github.sha }}"
+        echo "Commit Message: ${{ github.event.head_commit.message }}"
