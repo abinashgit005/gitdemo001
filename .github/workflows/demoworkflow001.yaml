@@ -1,5 +1,7 @@
 name: demo workflow
-on: 
+on:
+  workflow_dispatch:
+    
   push:
     paths: 
       - '**/demofile001.txt'
@@ -8,6 +10,8 @@ jobs:
   first-job:
     runs-on: ubuntu-latest
     steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
     - name: test workflow
       run: echo "demo workflow test"
     - name: list files
