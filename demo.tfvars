@@ -7,7 +7,7 @@ abinash = {
         fqdns = [
             "abc.com"
             "xyz.com"
-            "def.com"
+            "mnop.com"
         ]
     }
 }
