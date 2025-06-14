@@ -1,3 +1,16 @@
 demofile001
 2nd line push
 3rd line push
+
+abinash
+abinash = {
+    app_rules = {
+        abinash_all = {}
+        env = ["dev", "int"]
+        prtocols = [["Https", 443]]
+        fqdns = [
+            "abc.com"
+            "xyz.com"
+        ]
+    }
+}
