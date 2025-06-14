@@ -20,3 +20,6 @@ jobs:
       run: |
         echo "Commit SHA: ${{ github.sha }}"
         echo "Commit Message: ${{ github.event.head_commit.message }}"
+    - name: git changed files
+    run: |
+      git fetch origin ${{ github.event.before }}
