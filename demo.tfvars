@@ -8,7 +8,7 @@ abinash = {
             "abc.com"
             "xyz.com"
             "mnop.com"
-            "qps.com"
+            "pqrs.com"
         ]
     }
 }
