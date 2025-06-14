@@ -26,7 +26,7 @@ jobs:
     - name: show line by line changes
       run: |
         mkdir -p tfvars_changes
-        git diff ${{ github.event.before }} ${{ github.sha }} -- '*.tfvars' || echo "No tfvars changes"
+        git diff ${{ github.event.before }} ${{ github.sha }} -- '*.tfvars' > tfvars_changes/full_diff.txt
         grep '^+[^+]' tfvars_changes/full_diff.txt > tfvars_changes/added_lines.txt
         echo "Changed lines saved in tfvars_changes/added_lines.txt"
         cat tfvars_changes/added_lines.txt
