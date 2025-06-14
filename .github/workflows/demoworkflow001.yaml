@@ -4,8 +4,7 @@ on:
 
   push:
     paths: 
-      - '**/demofile001.txt'
-
+      - '**/demo.tfvars'
 jobs:
   first-job:
     runs-on: ubuntu-latest
