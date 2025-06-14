@@ -23,3 +23,6 @@ jobs:
       run: |
         git fetch origin ${{ github.event.before }}
         git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.tfvars$' || echo "No .tfvars file changed"
+    - name: show line by line changes
+      run: |
+        git diff ${{ github.event.before }} ${{ github.sha }} -- '*.tfvars' || echo "No tfvars changes"
