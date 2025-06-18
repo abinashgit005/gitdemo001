@@ -24,6 +24,20 @@ def extract_abinash_block(hcl_string):
     except Exception as e:
         print(f"Error parsing HCL: {e}")
         return {}
+def print_diff(old, new, prefix=""):
+    # Print keys removed
+    for key in old:
+        if key not in new:
+            print(f"❌ Removed: {prefix + key} = {old[key]}")
+        elif old[key] != new[key]:
+            if isinstance(old[key], dict) and isinstance(new[key], dict):
+                print_diff(old[key], new[key], prefix + key + ".")
+            else:
+                print(f"🔁 Changed: {prefix + key}: {old[key]} → {new[key]}")
+    # Print keys added
+    for key in new:
+        if key not in old:
+            print(f"✅ Added: {prefix + key} = {new[key]}")
 
 # ---------- Main logic ----------
 
