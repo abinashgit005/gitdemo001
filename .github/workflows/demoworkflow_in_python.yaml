@@ -30,6 +30,8 @@ jobs:
       - name: Run Python diff script
         id: check
         run: |
-          result=$(python3 scripts/diff.py | tee /dev/tty)
-          echo "$result" | grep "changed=true" && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+          result=$(python3 scripts/diff.py)
+          echo "$result"
+          changed=$(echo "$result" | grep "::set-output name=changed::" | cut -d'=' -f2)
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
     
