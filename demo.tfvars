@@ -9,6 +9,7 @@ abinash = {
             "xyz.com"
             "mno.com"
             "tuv.com"
+            "aks.com"
         ]
     }
 }
