@@ -27,12 +27,9 @@ jobs:
       - name: Check abinash diff
         id: diffcheck
         run: python3 scripts/diff.py
-      - name: Debug output
-        run: echo "Changed? ${{ steps.diffcheck.outputs.changed }}"
-
-      - name: Upload abinash_diff.txt
-        if: steps.diffcheck.outputs.changed == 'true'
+      - name: Upload added_fqdns.txt
+        if: success() && exists('added_fqdns.txt')
         uses: actions/upload-artifact@v4
         with:
-          name: abinash-diff
-          path: abinash_diff.txt
+          name: added-fqdns
+          path: added_fqdns.txt
