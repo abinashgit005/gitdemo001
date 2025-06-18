@@ -1,5 +1,4 @@
-name: Detect and Sync app_rules Changes
-
+name: demoworkflow_in_python
 on:
   workflow_dispatch:
   
