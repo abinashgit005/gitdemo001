@@ -1,6 +1,8 @@
 name: Detect and Sync app_rules Changes
 
 on:
+  workflow_dispatch:
+  
   push:
     paths:
       - terraform.tfvars
