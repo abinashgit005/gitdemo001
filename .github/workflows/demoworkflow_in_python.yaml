@@ -30,6 +30,6 @@ jobs:
       - name: Run Python diff script
         id: check
         run: |
-          result=$(python3 scripts/check_abinash_app_rules_diff.py | tee /dev/tty)
+          result=$(python3 scripts/diff.py | tee /dev/tty)
           echo "$result" | grep "changed=true" && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
     
