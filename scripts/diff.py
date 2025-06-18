@@ -1,10 +1,8 @@
-
-# scripts/diff.py
-
 import subprocess
 import hcl2
 import json
 from io import StringIO
+import os
 
 def get_file_content(commit, file):
     try:
@@ -20,24 +18,29 @@ def parse_abinash_block(content):
     except Exception:
         return {}
 
-# Load current file and previous version from git
+# Load current and previous
 current_path = "demo.tfvars"
 with open(current_path, "r") as f:
     current_content = f.read()
 previous_content = get_file_content("HEAD~1", current_path)
 
-# Parse abinash blocks
+# Parse and compare
 current_abinash = parse_abinash_block(current_content)
 previous_abinash = parse_abinash_block(previous_content)
 
-# Compare and output diff if changed
+# Save diff if changed
+output_path = os.environ.get("GITHUB_OUTPUT")
 if current_abinash != previous_abinash:
     diff = {
         "old": previous_abinash,
         "new": current_abinash
     }
-    print("::set-output name=changed::true")
     with open("abinash_diff.txt", "w") as out:
         out.write(json.dumps(diff, indent=2))
+    if output_path:
+        with open(output_path, "a") as f:
+            f.write("changed=true\n")
 else:
-    print("::set-output name=changed::false")
+    if output_path:
+        with open(output_path, "a") as f:
+            f.write("changed=false\n")
