@@ -1,15 +1,8 @@
 import subprocess
 import hcl2
 from io import StringIO
-import json
 
-# ---------- Helper functions ----------
-
-def get_commit_sha(ref):
-    result = subprocess.run(["git", "rev-parse", ref], capture_output=True, text=True, check=True)
-    return result.stdout.strip()
-
-def get_file_from_commit(commit, filepath):
+def get_file_content(commit, filepath):
     try:
         result = subprocess.run(["git", "show", f"{commit}:{filepath}"],
                                 capture_output=True, text=True, check=True)
@@ -17,51 +10,31 @@ def get_file_from_commit(commit, filepath):
     except subprocess.CalledProcessError:
         return ""
 
-def extract_abinash_block(hcl_string):
+def parse_abinash(content):
     try:
-        parsed = hcl2.load(StringIO(hcl_string))
-        return parsed.get("abinash", {})
-    except Exception as e:
-        print(f"Error parsing HCL: {e}")
-        return {}
-def print_diff(old, new, prefix=""):
-    # Print keys removed
-    for key in old:
-        if key not in new:
-            print(f"❌ Removed: {prefix + key} = {old[key]}")
-        elif old[key] != new[key]:
-            if isinstance(old[key], dict) and isinstance(new[key], dict):
-                print_diff(old[key], new[key], prefix + key + ".")
-            else:
-                print(f"🔁 Changed: {prefix + key}: {old[key]} → {new[key]}")
-    # Print keys added
-    for key in new:
-        if key not in old:
-            print(f"✅ Added: {prefix + key} = {new[key]}")
+        parsed = hcl2.load(StringIO(content))
+        return parsed.get("abinash", {}).get("app_rules", {}).get("fqdns", [])
+    except Exception:
+        return []
 
-# ---------- Main logic ----------
+# Get current and previous commit contents
+current = get_file_content("HEAD", "demo.tfvars")
+previous = get_file_content("HEAD~1", "demo.tfvars")
 
-file_path = "demo.tfvars"
+# Extract FQDNs
+current_fqdns = parse_abinash(current)
+previous_fqdns = parse_abinash(previous)
 
-# Get commit SHAs
-current_commit = get_commit_sha("HEAD")
-previous_commit = get_commit_sha("HEAD~1")
+# Compare
+added = set(current_fqdns) - set(previous_fqdns)
 
-# Get file content from both commits
-current_content = get_file_from_commit(current_commit, file_path)
-previous_content = get_file_from_commit(previous_commit, file_path)
-
-# Parse abinash blocks
-current_abinash = extract_abinash_block(current_content)
-previous_abinash = extract_abinash_block(previous_content)
-
-# Compare and print changes
-if current_abinash != previous_abinash:
-    print(f"🔁 Detected change in `abinash` block:")
-    print(json.dumps({
-        "previous": previous_abinash,
-        "current": current_abinash
-    }, indent=2))
-    print_diff(previous_abinash, current_abinash)
+if added:
+    print("✅ Added FQDNs:")
+    for fqdn in added:
+        print(f"- {fqdn}")
+    # Write to file for use in pipeline
+    with open("added_fqdns.txt", "w") as f:
+        for fqdn in added:
+            f.write(f"{fqdn}\n")
 else:
-    print("✅ No change in `abinash` block.")
+    print("✅ No new FQDNs added.")
