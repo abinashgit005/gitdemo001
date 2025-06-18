@@ -62,5 +62,6 @@ if current_abinash != previous_abinash:
         "previous": previous_abinash,
         "current": current_abinash
     }, indent=2))
+    print_diff(previous_abinash, current_abinash)
 else:
     print("✅ No change in `abinash` block.")
