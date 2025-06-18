@@ -11,6 +11,7 @@ abinash = {
             "tuv.com"
             "aks.com"
             "aws.com"
+            "gcp.com"
         ]
     }
 }
