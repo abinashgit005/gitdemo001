@@ -6,7 +6,6 @@ abinash = {
         prtocols = [["Https", 443]]
         fqdns = [
             "abc.com"
-            "xyz.com"
             "mno.com"
             "tuv.com"
             "aks.com"
