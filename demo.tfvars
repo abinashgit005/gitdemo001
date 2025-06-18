@@ -5,13 +5,13 @@ abinash = {
         env = ["dev", "int"]
         prtocols = [["Https", 443]]
         fqdns = [
-            "abc.com"
-            "mno.com"
-            "tuv.com"
-            "aks.com"
-            "aws.com"
-            "gcp.com"
-            "asp.com"
+            "abc.com",
+            "mno.com",
+            "tuv.com",
+            "aks.com",
+            "aws.com",
+            "gcp.com",
+            "asp.com",
         ]
     }
 }
