@@ -27,9 +27,3 @@ jobs:
       - name: Check abinash diff
         id: diffcheck
         run: python3 scripts/diff.py
-      - name: Upload added_fqdns.txt
-        if: success() && exists('added_fqdns.txt')
-        uses: actions/upload-artifact@v4
-        with:
-          name: added-fqdns
-          path: added_fqdns.txt
