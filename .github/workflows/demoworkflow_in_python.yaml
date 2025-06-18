@@ -4,7 +4,7 @@ on:
   
   push:
     paths:
-      - terraform.tfvars
+      - '**/demo.tfvars'
 
 jobs:
   detect-app-rules-changes:
@@ -24,8 +24,8 @@ jobs:
       - name: Prepare tfvars comparison
         run: |
           mkdir -p tmp
-          git show HEAD~1:terraform.tfvars > tmp/old.tfvars || touch tmp/old.tfvars
-          cp terraform.tfvars tmp/new.tfvars
+          git show HEAD~1:demo.tfvars > tmp/old.tfvars || touch tmp/old.tfvars
+          cp demo.tfvars tmp/new.tfvars
 
       - name: Run Python diff script
         id: check
