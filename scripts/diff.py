@@ -27,6 +27,7 @@ added = set(current_fqdns) - set(previous_fqdns)
 
 if added:
     print("✅ Added FQDNs:")
+    print("added")
     with open("fqdns_update.txt", "w") as f:
         for fqdn in sorted(added):
             print(f"- {fqdn}")
