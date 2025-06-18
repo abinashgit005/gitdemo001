@@ -26,7 +26,7 @@ jobs:
 
       - name: Check abinash diff
         id: diffcheck
-        run: python3 scripts/check_abinash_diff.py
+        run: python3 scripts/diff.py
 
       - name: Upload abinash_diff.txt
         if: steps.diffcheck.outputs.changed == 'true'
