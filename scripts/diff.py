@@ -1,31 +1,43 @@
 
-# scripts/check_abinash_app_rules_diff.py
+# scripts/diff.py
 
+import subprocess
 import hcl2
-from deepdiff import DeepDiff
 import json
-import os
+from io import StringIO
 
-def extract_app_rules(path):
-    if not os.path.exists(path):
+def get_file_content(commit, file):
+    try:
+        result = subprocess.run(["git", "show", f"{commit}:{file}"],
+                                capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError:
+        return ""
+
+def parse_abinash_block(content):
+    try:
+        return hcl2.load(StringIO(content)).get("abinash", {})
+    except Exception:
         return {}
-    with open(path, 'r') as f:
-        data = hcl2.load(f)
-    return data.get("abinash", {}).get("app_rules", {})
 
-old = extract_app_rules("tmp/old.tfvars")
-new = extract_app_rules("tmp/new.tfvars")
+# Load current file and previous version from git
+current_path = "demo.tfvars"
+with open(current_path, "r") as f:
+    current_content = f.read()
+previous_content = get_file_content("HEAD~1", current_path)
 
-diff = DeepDiff(old, new, ignore_order=True)
+# Parse abinash blocks
+current_abinash = parse_abinash_block(current_content)
+previous_abinash = parse_abinash_block(previous_content)
 
-if diff:
-    print("🔁 Detected changes in abinash.app_rules:")
-    print(json.dumps(diff, indent=2))
-    with open("tmp/app_rules_diff.json", "w") as f:
-        json.dump(diff, f, indent=2)
-    print("changed=true")  # Used in workflow
-    exit(0)
+# Compare and output diff if changed
+if current_abinash != previous_abinash:
+    diff = {
+        "old": previous_abinash,
+        "new": current_abinash
+    }
+    print("::set-output name=changed::true")
+    with open("abinash_diff.txt", "w") as out:
+        out.write(json.dumps(diff, indent=2))
 else:
-    print("✅ No change in abinash.app_rules")
-    print("changed=false")
-    exit(0)
+    print("::set-output name=changed::false")
