@@ -22,7 +22,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install hcl2 parser
-        run: pip install hcl2
+        run: pip install python-hcl2
 
       - name: Check abinash diff
         id: diffcheck
