@@ -1,0 +1,22 @@
+name: Detect and Sync app_rules Changes
+
+on:
+  push:
+    paths:
+      - terraform.tfvars
+
+jobs:
+  detect-app-rules-changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2  # Fetch previous commit to compare
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip install hcl2 deepdiff
