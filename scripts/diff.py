@@ -1,46 +1,52 @@
 import subprocess
 import hcl2
-import json
 from io import StringIO
-import os
+import json
 
-def get_file_content(commit, file):
+# ---------- Helper functions ----------
+
+def get_commit_sha(ref):
+    result = subprocess.run(["git", "rev-parse", ref], capture_output=True, text=True, check=True)
+    return result.stdout.strip()
+
+def get_file_from_commit(commit, filepath):
     try:
-        result = subprocess.run(["git", "show", f"{commit}:{file}"],
+        result = subprocess.run(["git", "show", f"{commit}:{filepath}"],
                                 capture_output=True, text=True, check=True)
         return result.stdout
     except subprocess.CalledProcessError:
         return ""
 
-def parse_abinash_block(content):
+def extract_abinash_block(hcl_string):
     try:
-        return hcl2.load(StringIO(content)).get("abinash", {})
-    except Exception:
+        parsed = hcl2.load(StringIO(hcl_string))
+        return parsed.get("abinash", {})
+    except Exception as e:
+        print(f"Error parsing HCL: {e}")
         return {}
 
-# Load current and previous
-current_path = "demo.tfvars"
-with open(current_path, "r") as f:
-    current_content = f.read()
-previous_content = get_file_content("HEAD~1", current_path)
+# ---------- Main logic ----------
 
-# Parse and compare
-current_abinash = parse_abinash_block(current_content)
-previous_abinash = parse_abinash_block(previous_content)
+file_path = "demo.tfvars"
 
-# Save diff if changed
-output_path = os.environ.get("GITHUB_OUTPUT")
+# Get commit SHAs
+current_commit = get_commit_sha("HEAD")
+previous_commit = get_commit_sha("HEAD~1")
+
+# Get file content from both commits
+current_content = get_file_from_commit(current_commit, file_path)
+previous_content = get_file_from_commit(previous_commit, file_path)
+
+# Parse abinash blocks
+current_abinash = extract_abinash_block(current_content)
+previous_abinash = extract_abinash_block(previous_content)
+
+# Compare and print changes
 if current_abinash != previous_abinash:
-    diff = {
-        "old": previous_abinash,
-        "new": current_abinash
-    }
-    with open("abinash_diff.txt", "w") as out:
-        out.write(json.dumps(diff, indent=2))
-    if output_path:
-        with open(output_path, "a") as f:
-            f.write("changed=true\n")
+    print(f"🔁 Detected change in `abinash` block:")
+    print(json.dumps({
+        "previous": previous_abinash,
+        "current": current_abinash
+    }, indent=2))
 else:
-    if output_path:
-        with open(output_path, "a") as f:
-            f.write("changed=false\n")
+    print("✅ No change in `abinash` block.")
