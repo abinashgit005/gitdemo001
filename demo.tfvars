@@ -12,6 +12,7 @@ abinash = {
             "aws.com",
             "gcp.com",
             "asp.com",
+            "passed.com"
         ]
     }
 }
