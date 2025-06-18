@@ -10,31 +10,26 @@ def get_file_content(commit, filepath):
     except subprocess.CalledProcessError:
         return ""
 
-def parse_abinash(content):
+def extract_fqdns(hcl_string):
     try:
-        parsed = hcl2.load(StringIO(content))
+        parsed = hcl2.load(StringIO(hcl_string))
         return parsed.get("abinash", {}).get("app_rules", {}).get("fqdns", [])
     except Exception:
         return []
 
-# Get current and previous commit contents
 current = get_file_content("HEAD", "demo.tfvars")
 previous = get_file_content("HEAD~1", "demo.tfvars")
 
-# Extract FQDNs
-current_fqdns = parse_abinash(current)
-previous_fqdns = parse_abinash(previous)
+current_fqdns = extract_fqdns(current)
+previous_fqdns = extract_fqdns(previous)
 
-# Compare
 added = set(current_fqdns) - set(previous_fqdns)
 
 if added:
     print("✅ Added FQDNs:")
-    for fqdn in added:
-        print(f"- {fqdn}")
-    # Write to file for use in pipeline
-    with open("added_fqdns.txt", "w") as f:
-        for fqdn in added:
+    with open("fqdns_update.txt", "w") as f:
+        for fqdn in sorted(added):
+            print(f"- {fqdn}")
             f.write(f"{fqdn}\n")
 else:
     print("✅ No new FQDNs added.")
