@@ -16,22 +16,21 @@ jobs:
         with:
           fetch-depth: 2  # Fetch previous commit to compare
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          pip install python-hcl2 deepdiff
-      - name: Prepare tfvars comparison
-        run: |
-          mkdir -p tmp
-          git show HEAD~1:demo.tfvars > tmp/old.tfvars || touch tmp/old.tfvars
-          cp demo.tfvars tmp/new.tfvars
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      - name: Run Python diff script
-        id: check
-        run: |
-          result=$(python3 scripts/diff.py)
-          echo "$result"
-          changed=$(echo "$result" | grep "::set-output name=changed::" | cut -d'=' -f2)
-          echo "changed=$changed" >> "$GITHUB_OUTPUT"
-    
+      - name: Install hcl2 parser
+        run: pip install hcl2
+
+      - name: Check abinash diff
+        id: diffcheck
+        run: python3 scripts/check_abinash_diff.py
+
+      - name: Upload abinash_diff.txt
+        if: steps.diffcheck.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: abinash-diff
+          path: abinash_diff.txt
