@@ -12,6 +12,7 @@ abinash = {
             "again.com",
             "onceagain.com",
             "okay.com",
+            "aka.com",
         ]
     }
 }
