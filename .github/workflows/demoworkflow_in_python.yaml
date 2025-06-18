@@ -27,6 +27,8 @@ jobs:
       - name: Check abinash diff
         id: diffcheck
         run: python3 scripts/diff.py
+      - name: Debug output
+        run: echo "Changed? ${{ steps.diffcheck.outputs.changed }}"
 
       - name: Upload abinash_diff.txt
         if: steps.diffcheck.outputs.changed == 'true'
