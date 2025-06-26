@@ -12,6 +12,7 @@ abinash = {
             "mytask.com",          # added my task 
             "test.com",            # test the script
             "mytest.com",          # my test
+            "latest.com",          # latest added
         ]
     }
 }
