@@ -35,3 +35,11 @@ jobs:
         
       - name: Run Python script to updtae readme.md
         run: python3 scripts/update_readme.py
+
+      - name: test
+        run: |
+          # Create the file
+          echo 'xyz.com | used in dev' > tfvars_changes/added_fqdns.txt
+          # Try reading it from Python
+          python -c "print(open('tfvars_changes/added_fqdns.txt').read())"
+
