@@ -14,34 +14,27 @@ inside_abinash = False
 collected = []
 
 for i, line in enumerate(lines):
-    # Remove newline and trailing spaces
     stripped = line.strip()
 
-    # Track unmodified context lines to enter the abinash block
-    if not inside_abinash:
-        if re.search(r'abinash\s*=\s*{', stripped):
-            inside_abinash = True
-            # Search backward to include context
-            context_start = i
-            while context_start > 0 and not lines[context_start].strip().endswith('{'):
-                context_start -= 1
-            collected.append(f"# Context start at line {context_start}")
-            continue
+    # Enter the abinash block
+    if not inside_abinash and re.search(r'abinash\s*=\s*{', stripped):
+        inside_abinash = True
+        continue
 
     if inside_abinash:
-        # End block when closing brace detected
+        # Exit on closing brace
         if re.match(r'^[ +\-]*}', stripped):
             inside_abinash = False
             continue
 
-        # Collect added or removed lines
-        if stripped.startswith('+') or stripped.startswith('-'):
+        # Collect only added lines (starting with '+')
+        if stripped.startswith('+'):
             collected.append(line)
 
-# Output result
+# Output added lines only
 if collected:
-    print("✅ Detected changes inside 'abinash' block:")
+    print("✅ Added lines inside 'abinash' block:")
     for l in collected:
         print(l.strip())
 else:
-    print("🟢 No changes in 'abinash' block.")
+    print("🟢 No added lines in 'abinash' block.")
