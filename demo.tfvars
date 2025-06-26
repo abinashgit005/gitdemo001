@@ -6,14 +6,6 @@ abinash = {
         prtocols = [["Https", 443]]
         fqdns = [
             "abc.com",
-            "mno.com",
-            "aks.com",
-            "random.com",
-            "again.com",
-            "onceagain.com",
-            "okay.com",
-            "aka.com",
-            "added.com",
             "newwebsite.com",      # website for newwebsite company
             "newscript.com",       # new script
         ]
