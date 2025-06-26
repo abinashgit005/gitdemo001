@@ -21,9 +21,14 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install hcl2 parser
-        run: pip install python-hcl2
+      - name: Get previous commit SHA
+        id: prev
+        run: echo "PREV_COMMIT=$(git rev-parse HEAD^1)" >> $GITHUB_OUTPUT
 
-      - name: Check abinash diff
-        id: diffcheck
+      - name: Generate git diff for demo.tfvars
+        run: |
+          mkdir -p tfvars_changes
+          git diff ${{ steps.prev.outputs.PREV_COMMIT }} HEAD -- demo.tfvars > tfvars_changes/full_diff.txt
+
+      - name: Run Python script to print abinash block changes
         run: python3 scripts/diff.py
