@@ -9,11 +9,6 @@ abinash = {
             "newwebsite.com",      # website for newwebsite company
             "newscript.com",       # new script
             "mno.com",             # added for mno
-            "mytask.com",          # added my task 
-            "test.com",            # test the script
-            "mytest.com",          # my test
-            "latest.com",          # latest added
-            "again.com",           # again added
         ]
     }
 }
