@@ -35,4 +35,5 @@ for fqdn, comment in new_rows:
 with open(readme, "w") as f:
     f.writelines(lines)
 
-print("✅ README.md updated.")
+print("\n✅ README.md updated. Here's the new content:\n")
+print("".join(lines))
