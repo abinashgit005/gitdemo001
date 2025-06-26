@@ -13,6 +13,7 @@ abinash = {
             "test.com",            # test the script
             "mytest.com",          # my test
             "latest.com",          # latest added
+            "again.com",           # again added
         ]
     }
 }
