@@ -10,6 +10,7 @@ abinash = {
             "newscript.com",       # new script
             "mno.com",             # added for mno
             "mytask.com",          # added my task 
+            "test.com",            # test the script
         ]
     }
 }
