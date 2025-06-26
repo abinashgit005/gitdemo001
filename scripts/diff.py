@@ -1,60 +1,47 @@
-# extract_fqdns.py
-
+# check_abinash_changes.py
 import re
-import os
 
 diff_path = "tfvars_changes/full_diff.txt"
-output_path = "tfvars_changes/added_fqdns.txt"
 
-# Ensure output dir exists
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-with open(diff_path) as f:
-    lines = f.readlines()
+try:
+    with open(diff_path) as f:
+        lines = f.readlines()
+except FileNotFoundError:
+    print("No diff file found.")
+    exit(1)
 
 inside_abinash = False
-fqdn_block = False
-added_fqdns = []
+collected = []
 
-for line in lines:
+for i, line in enumerate(lines):
+    # Remove newline and trailing spaces
     stripped = line.strip()
 
-    if re.match(r'^[ +-]*abinash\s*=\s*{', stripped):
-        inside_abinash = True
-        continue
+    # Track unmodified context lines to enter the abinash block
+    if not inside_abinash:
+        if re.search(r'abinash\s*=\s*{', stripped):
+            inside_abinash = True
+            # Search backward to include context
+            context_start = i
+            while context_start > 0 and not lines[context_start].strip().endswith('{'):
+                context_start -= 1
+            collected.append(f"# Context start at line {context_start}")
+            continue
 
     if inside_abinash:
-        if re.match(r'^[ +-]*}', stripped):
+        # End block when closing brace detected
+        if re.match(r'^[ +\-]*}', stripped):
             inside_abinash = False
-            fqdn_block = False
             continue
 
-        if re.match(r'^[ +-]*fqdns\s*=\s*\[', stripped):
-            fqdn_block = True
-            continue
+        # Collect added or removed lines
+        if stripped.startswith('+') or stripped.startswith('-'):
+            collected.append(line)
 
-        if fqdn_block:
-            if re.match(r'^[ +-]*\]', stripped):
-                fqdn_block = False
-                continue
-
-            if line.startswith('+') and '"' in line:
-                fqdn_match = re.search(r'"([^"]+)"', line)
-                comment_match = re.search(r'#(.*)', line)
-                fqdn = fqdn_match.group(1).strip() if fqdn_match else ''
-                comment = comment_match.group(1).strip() if comment_match else ''
-                if fqdn:
-                    added_fqdns.append(f"{fqdn} | {comment or 'Added automatically'}")
-
-# Save results
-with open(output_path, "w") as f:
-    for fq in added_fqdns:
-        f.write(f"{fq}\n")
-
-# Log to console
-if added_fqdns:
-    print("✅ Added FQDNs found:")
-    for fq in added_fqdns:
-        print(f"- {fq}")
+# Output result
+if collected:
+    print("✅ Detected changes inside 'abinash' block:")
+    for l in collected:
+        print(l.strip())
 else:
-    print("🟢 No new FQDNs found.")
+    print("🟢 No changes in 'abinash' block.")
