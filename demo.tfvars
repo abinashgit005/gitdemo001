@@ -12,6 +12,7 @@ abinash = {
             "xyz.com",             # added xyz
             "pqr.com",                # added pqr
             "update.com",           # update
+            "default.com",     # default value
         ]
     }
 }
