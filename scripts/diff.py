@@ -1,47 +1,46 @@
-# check_abinash_changes.py
 import re
+import os
 
+# Paths
 diff_path = "tfvars_changes/full_diff.txt"
+readme_path = "README.md"
 
-try:
-    with open(diff_path) as f:
-        lines = f.readlines()
-except FileNotFoundError:
-    print("No diff file found.")
-    exit(1)
+# Step 1: Extract added FQDNs from abinash block
+with open(diff_path) as f:
+    lines = f.readlines()
 
 inside_abinash = False
-collected = []
+fqdn_block = False
+added_fqdns = []
 
-for i, line in enumerate(lines):
-    # Remove newline and trailing spaces
+for line in lines:
     stripped = line.strip()
 
-    # Track unmodified context lines to enter the abinash block
-    if not inside_abinash:
-        if re.search(r'abinash\s*=\s*{', stripped):
-            inside_abinash = True
-            # Search backward to include context
-            context_start = i
-            while context_start > 0 and not lines[context_start].strip().endswith('{'):
-                context_start -= 1
-            collected.append(f"# Context start at line {context_start}")
-            continue
+    # Enter abinash block
+    if re.match(r'^[ +-]*abinash\s*=\s*{', stripped):
+        inside_abinash = True
+        continue
 
     if inside_abinash:
-        # End block when closing brace detected
-        if re.match(r'^[ +\-]*}', stripped):
+        # Exit block
+        if re.match(r'^[ +-]*}', stripped):
             inside_abinash = False
+            fqdn_block = False
             continue
 
-        # Collect added or removed lines
-        if stripped.startswith('+') or stripped.startswith('-'):
-            collected.append(line)
+        # Detect fqdns list
+        if re.match(r'^[ +-]*fqdns\s*=\s*\[', stripped):
+            fqdn_block = True
+            continue
 
-# Output result
-if collected:
-    print("✅ Detected changes inside 'abinash' block:")
-    for l in collected:
-        print(l.strip())
-else:
-    print("🟢 No changes in 'abinash' block.")
+        if fqdn_block:
+            # End of fqdns list
+            if re.match(r'^[ +-]*\]', stripped):
+                fqdn_block = False
+                continue
+
+            # Capture added lines
+            if line.startswith('+') and '"' in line:
+                match = re.search(r'"(.*?)"', line)
+                if match:
+                    added_fqdns.append(match.group(1))
