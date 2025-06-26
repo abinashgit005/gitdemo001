@@ -14,7 +14,8 @@ abinash = {
             "okay.com",
             "aka.com",
             "added.com",
-            "newwebsite.com"      # website for newwebsite company
+            "newwebsite.com",      # website for newwebsite company
+            "newscript.com",       # new script
         ]
     }
 }
