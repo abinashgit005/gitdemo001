@@ -8,6 +8,7 @@ abinash = {
             "abc.com",
             "newwebsite.com",      # website for newwebsite company
             "newscript.com",       # new script
+            "mno.com",             # added for mno
         ]
     }
 }
