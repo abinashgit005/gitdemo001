@@ -32,3 +32,5 @@ jobs:
 
       - name: Run Python script to print abinash block changes
         run: python3 scripts/diff.py
+      - name: Run Python script to print abinash block changes
+        run: python3 scripts/update_readme.py
