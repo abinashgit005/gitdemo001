@@ -19,7 +19,7 @@ jobs:
           echo "🔍 Looking for changes in tmac-internet > app_rules > tsac_all > fqdns"
 
           mkdir -p tfvars_changes
-          git diff HEAD^ HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
+          git diff HEAD~1 HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
           cat tfvars_changes/full_diff.txt
 
           # Extract only the tsac_all block
