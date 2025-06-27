@@ -1,6 +1,7 @@
 name: Detect FQDN Additions in tmac-internet.tsac_all
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'demo.tfvars'
