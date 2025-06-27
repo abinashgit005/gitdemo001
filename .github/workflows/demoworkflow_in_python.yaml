@@ -1,53 +1,39 @@
-name: demoworkflow_in_python
+name: Detect FQDN Additions in tmac-internet.tsac_all
+
 on:
-  workflow_dispatch:
-  
   push:
     paths:
-      - '**/demo.tfvars'
+      - 'terraform.tfvars'
 
 jobs:
-  detect-app-rules-changes:
+  detect-added-fqdns:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout current repo
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Fetch previous commit to compare
+          fetch-depth: 2  # Required for git diff
 
-      - name: Get previous commit SHA
-        id: prev
-        run: echo "PREV_COMMIT=$(git rev-parse HEAD^1)" >> $GITHUB_OUTPUT
-
-    #  - name: Generate git diff for demo.tfvars
-    #    run: |
-    #     mkdir -p tfvars_changes
-          # git diff --unified=20 HEAD^ HEAD terraform.tfvars > tfvars_changes/full_diff.txt
-
-      - name: Generate git diff with context
+      - name: Parse and Extract FQDNs
         run: |
+          echo "🔍 Looking for changes in tmac-internet > app_rules > tsac_all > fqdns"
+
           mkdir -p tfvars_changes
-          if git rev-parse HEAD^ >/dev/null 2>&1; then
-             git diff --unified=20 HEAD^ HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
+          git diff HEAD^ HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
+
+          # Extract only the tsac_all block
+          awk '
+            /tmac-internet\s*=\s*{/ { in_tmac=1 }
+            in_tmac && /app_rules\s*=\s*{/ { in_app=1 }
+            in_app && /tsac_all\s*=\s*{/ { in_tsac=1 }
+            in_tsac && /fqdns\s*=\s*\[/ { in_fqdns=1; next }
+            in_fqdns && /\]/ { in_fqdns=0 }
+            in_fqdns { print }
+          ' tfvars_changes/full_diff.txt | grep '^+[^+]' > tfvars_changes/added_fqdns_lines.txt
+
+          if [[ -s tfvars_changes/added_fqdns_lines.txt ]]; then
+            echo "✅ Newly added FQDNs (with comments):"
+            cat tfvars_changes/added_fqdns_lines.txt | sed 's/^+//; s/^[[:space:]]*//'
           else
-             echo "# No previous commit to compare" > tfvars_changes/full_diff.txt
+            echo "⚠️ No FQDNs were added in tmac-internet > app_rules > tsac_all."
           fi
-
-
-      - name: show content
-        run: cat tfvars_changes/full_diff.txt
-
-      - name: Run Python script to print abinash block changes
-        run: python3 scripts/diff.py
-        
-      - name: Run Python script to updtae readme.md
-        run: python3 scripts/update_readme.py
-
-      - name: test
-        run: |
-          # Create the file
-          echo 'xyz.com | used in dev' > tfvars_changes/added_fqdns.txt
-          # Try reading it from Python
-          python -c "print(open('tfvars_changes/added_fqdns.txt').read())"
-
