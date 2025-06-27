@@ -10,6 +10,7 @@ tmac-internet = {
                 "pqr.com",    # added pqr
                 "stu.com", # added
                 "wxy.com"    # again added
+                "super.com", # super
             ]
         }
     }
