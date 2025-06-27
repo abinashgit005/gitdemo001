@@ -15,6 +15,7 @@ tmac-internet = {
                 "awk.com"   # use awk
                 "awk2.com", # used awk2
                 "demo.com", # added demo
+                "simple.com", # added
             ]
         }
     }
