@@ -13,6 +13,7 @@ tmac-internet = {
                 "super.com", # super
                 "test.com",  # test
                 "awk.com"   # use awk
+                "awk2.com", # used awk2
             ]
         }
     }
