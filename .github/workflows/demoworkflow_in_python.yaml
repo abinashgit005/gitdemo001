@@ -27,6 +27,7 @@ jobs:
 
       - name: Generate git diff with context
         run: |
+          mkdir -p tfvars_changes
           if git rev-parse HEAD^ >/dev/null 2>&1; then
              git diff --unified=20 HEAD^ HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
           else
