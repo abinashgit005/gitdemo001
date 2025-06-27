@@ -3,7 +3,7 @@ name: Detect FQDN Additions in tmac-internet.tsac_all
 on:
   push:
     paths:
-      - 'terraform.tfvars'
+      - 'demo.tfvars'
 
 jobs:
   detect-added-fqdns:
