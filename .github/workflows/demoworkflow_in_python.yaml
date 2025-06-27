@@ -16,11 +16,6 @@ jobs:
         with:
           fetch-depth: 2  # Fetch previous commit to compare
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
       - name: Get previous commit SHA
         id: prev
         run: echo "PREV_COMMIT=$(git rev-parse HEAD^1)" >> $GITHUB_OUTPUT
@@ -28,7 +23,7 @@ jobs:
       - name: Generate git diff for demo.tfvars
         run: |
           mkdir -p tfvars_changes
-          git diff ${{ steps.prev.outputs.PREV_COMMIT }} HEAD -- demo.tfvars > tfvars_changes/full_diff.txt
+          git diff --unified=20 HEAD^ HEAD terraform.tfvars > tfvars_changes/full_diff.txt
 
       - name: show content
         run: cat tfvars_changes/full_diff.txt
