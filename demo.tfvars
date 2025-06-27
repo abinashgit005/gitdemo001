@@ -4,10 +4,11 @@ tmac-internet = {
             env   = ["dev", "int", "prod"]
             protocols = ["Https", 443]
             fqdns = [
-                abc.com # added abc
-                xyz.com # added xyz
+                "abc.com" # added abc
+                "xyz.com" # added xyz
                 "mno.com",   # added mno
                 "pqr.com",    # added pqr
+                "stu.com", # added
             ]
         }
     }
