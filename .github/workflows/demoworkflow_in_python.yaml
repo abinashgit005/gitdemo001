@@ -21,7 +21,8 @@ jobs:
           mkdir -p tfvars_changes
           git diff HEAD~1 HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
           cat tfvars_changes/full_diff.txt
-
+      - name: Parse and Extract FQDNs
+        run: |
           # Extract only the tsac_all block
           awk '
             /tmac-internet\s*=\s*{/ { in_tmac=1 }
