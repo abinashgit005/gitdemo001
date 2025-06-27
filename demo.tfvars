@@ -9,6 +9,7 @@ tmac-internet = {
                 "mno.com",   # added mno
                 "pqr.com",    # added pqr
                 "stu.com", # added
+                "wxy,com"    # again added
             ]
         }
     }
