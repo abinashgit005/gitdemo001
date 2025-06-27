@@ -12,6 +12,7 @@ tmac-internet = {
                 "wxy.com"    # again added
                 "super.com", # super
                 "test.com",  # test
+                "awk.com"   # use awk
             ]
         }
     }
