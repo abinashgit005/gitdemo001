@@ -2,7 +2,6 @@ import subprocess
 import re
 from pathlib import Path
 
-# Get the git diff output
 diff_file = Path("tfvars_changes/full_diff.txt")
 diff_file.parent.mkdir(exist_ok=True)
 
@@ -11,13 +10,14 @@ try:
         ["git", "diff", "HEAD^", "HEAD", "--", "terraform.tfvars"],
         text=True
     )
-except subprocess.CalledProcessError:
-    print("❌ Git diff failed. Possibly no previous commit or file not changed.")
+except subprocess.CalledProcessError as e:
+    print("❌ Git diff failed:", e)
     exit(0)
 
 diff_file.write_text(diff_output)
+print("📄 Full git diff:\n", diff_output)
 
-# Parse only tmac-internet > app_rules > tsac_all > fqdns block
+# Start parsing
 in_tmac = in_app = in_tsac = in_fqdns = False
 added_fqdns = []
 
@@ -26,23 +26,29 @@ for line in diff_output.splitlines():
 
     if re.match(r'^[\+\s-]*tmac-internet\s*=\s*{', line):
         in_tmac = True
+        print("🔍 Entered tmac-internet")
         continue
     if in_tmac and re.match(r'^[\+\s-]*app_rules\s*=\s*{', line):
         in_app = True
+        print("🔍 Entered app_rules")
         continue
     if in_app and re.match(r'^[\+\s-]*tsac_all\s*=\s*{', line):
         in_tsac = True
+        print("🔍 Entered tsac_all")
         continue
     if in_tsac and re.match(r'^[\+\s-]*fqdns\s*=\s*\[', line):
         in_fqdns = True
+        print("🔍 Entered fqdns list")
         continue
     if in_fqdns and "]" in line:
         in_fqdns = False
+        print("✅ End of fqdns list")
         continue
 
     if in_fqdns and line.startswith("+") and not line.startswith("++"):
         cleaned_line = line.lstrip("+").strip()
         if cleaned_line:
+            print("➕ Found added domain:", cleaned_line)
             added_fqdns.append(cleaned_line)
 
 if added_fqdns:
