@@ -14,29 +14,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2  # Required for git diff
-
-      - name: Parse and Extract FQDNs
-        run: |
-          echo "🔍 Looking for changes in tmac-internet > app_rules > tsac_all > fqdns"
-
-          mkdir -p tfvars_changes
-          git diff HEAD~1 HEAD -- terraform.tfvars > tfvars_changes/full_diff.txt
-          cat tfvars_changes/full_diff.txt
-      - name: Parse and Extract FQDNs
-        run: |
-          # Extract only the tsac_all block
-          awk '
-            /tmac-internet\s*=\s*{/ { in_tmac=1 }
-            in_tmac && /app_rules\s*=\s*{/ { in_app=1 }
-            in_app && /tsac_all\s*=\s*{/ { in_tsac=1 }
-            in_tsac && /fqdns\s*=\s*\[/ { in_fqdns=1; next }
-            in_fqdns && /\]/ { in_fqdns=0 }
-            in_fqdns { print }
-          ' tfvars_changes/full_diff.txt | grep '^+[^+]' > tfvars_changes/added_fqdns_lines.txt
-
-          if [[ -s tfvars_changes/added_fqdns_lines.txt ]]; then
-            echo "✅ Newly added FQDNs (with comments):"
-            cat tfvars_changes/added_fqdns_lines.txt | sed 's/^+//; s/^[[:space:]]*//'
-          else
-            echo "⚠️ No FQDNs were added in tmac-internet > app_rules > tsac_all."
-          fi
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Create Diff Folder
+        run: mkdir -p tfvars_changes
+        
+      - name: Run Python to extract new FQDNs
+        run: python3 scripts/diff.py
