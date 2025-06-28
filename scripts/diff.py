@@ -1,5 +1,4 @@
 import subprocess
-import re
 from pathlib import Path
 
 diff_file = Path("tfvars_changes/full_diff.txt")
@@ -21,31 +20,30 @@ if not diff_output.strip():
 diff_file.write_text(diff_output)
 print("📄 Full git diff:\n", diff_output)
 
-# Initialize state flags
-in_tmac = in_app = in_tsac = in_fqdns = False
+# 🧠 Smarter block detection based on structure in diff
+in_block = False
+block_path = []
+
 added_fqdns = []
 
 for line in diff_output.splitlines():
-    raw = line.strip()
+    stripped = line.strip()
 
-    if "tmac-internet" in line and "=" in line and "{" in line:
-        in_tmac = True
+    if "tmac-internet" in line:
+        block_path = ["tmac-internet"]
+    elif "app_rules" in line and "{" in line:
+        block_path.append("app_rules")
+    elif "tsac_all" in line and "{" in line:
+        block_path.append("tsac_all")
+    elif "fqdns" in line and "[" in line:
+        if block_path == ["tmac-internet", "app_rules", "tsac_all"]:
+            in_block = True
         continue
-    if in_tmac and "app_rules" in line and "=" in line and "{" in line:
-        in_app = True
-        continue
-    if in_app and "tsac_all" in line and "=" in line and "{" in line:
-        in_tsac = True
-        continue
-    if in_tsac and "fqdns" in line and "=" in line and "[" in line:
-        in_fqdns = True
-        continue
-    if in_fqdns and "]" in line:
-        in_fqdns = False
+    elif "]" in line and in_block:
+        in_block = False
         continue
 
-    # Now we're inside the fqdns list block
-    if in_fqdns and line.startswith("+") and not line.startswith("++"):
+    if in_block and line.startswith("+") and not line.startswith("++"):
         cleaned = line.lstrip("+").strip()
         if cleaned:
             added_fqdns.append(cleaned)
