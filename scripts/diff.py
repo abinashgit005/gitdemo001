@@ -54,3 +54,6 @@ if added_fqdns:
         print(fqdn)
 else:
     print("⚠️ No FQDNs were added in tmac-internet > app_rules > tsac_all.")
+
+output_path = Path("added_fqdns.txt")
+output_path.write_text("\n".join(added_fqdns))
