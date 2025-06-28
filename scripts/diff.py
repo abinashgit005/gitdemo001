@@ -7,14 +7,14 @@ diff_file.parent.mkdir(exist_ok=True)
 
 try:
     diff_output = subprocess.check_output(
-        ["git", "diff", "HEAD~1", "HEAD", "--", "terraform.tfvars"],
+        ["git", "diff", "HEAD~1", "HEAD", "--", "demo.tfvars"],
         text=True
     )
 except subprocess.CalledProcessError as e:
     print("❌ Git diff failed:", e)
     diff_output = ""
 if not diff_output.strip():
-    print("📭 No diff found in terraform.tfvars between last 2 commits.")
+    print("📭 No diff found in demo.tfvars between last 2 commits.")
     exit(0)
 
 diff_file.write_text(diff_output)
