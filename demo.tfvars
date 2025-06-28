@@ -8,6 +8,7 @@ tmac-internet = {
                 "xyz.com" # added xyz
                 "added.com", #added
                 "test001.com", test001
+                "test002.com", # test002 added 
             ]
         }
     }
