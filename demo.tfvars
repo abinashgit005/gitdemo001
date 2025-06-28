@@ -12,6 +12,7 @@ tmac-internet = {
                 "test003.com", # test003 added 
                 "mytest004.com",        # mytest004 added
                 "my check.com",      # added my check
+                "aka.com",              #added aka
             ]
         }
     }
