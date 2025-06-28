@@ -1,39 +1,53 @@
-# check_fqdn_additions.py
+import subprocess
 import re
+from pathlib import Path
 
-with open("tfvars_changes/full_diff.txt") as f:
-    lines = f.readlines()
+# Get the git diff output
+diff_file = Path("tfvars_changes/full_diff.txt")
+diff_file.parent.mkdir(exist_ok=True)
 
-inside = False
-path = []
+try:
+    diff_output = subprocess.check_output(
+        ["git", "diff", "HEAD^", "HEAD", "--", "terraform.tfvars"],
+        text=True
+    )
+except subprocess.CalledProcessError:
+    print("❌ Git diff failed. Possibly no previous commit or file not changed.")
+    exit(0)
 
+diff_file.write_text(diff_output)
+
+# Parse only tmac-internet > app_rules > tsac_all > fqdns block
+in_tmac = in_app = in_tsac = in_fqdns = False
 added_fqdns = []
 
-for line in lines:
-    # Detect block starts from diff context
-    match = re.search(r'(\w[\w-]*)\s*=\s*{', line)
-    if match:
-        path.append(match.group(1))
+for line in diff_output.splitlines():
+    line_stripped = line.strip()
 
-    # Detect block end
-    elif re.match(r'^[ +\-]*}', line):
-        if path:
-            path.pop()
+    if re.match(r'^[\+\s-]*tmac-internet\s*=\s*{', line):
+        in_tmac = True
+        continue
+    if in_tmac and re.match(r'^[\+\s-]*app_rules\s*=\s*{', line):
+        in_app = True
+        continue
+    if in_app and re.match(r'^[\+\s-]*tsac_all\s*=\s*{', line):
+        in_tsac = True
+        continue
+    if in_tsac and re.match(r'^[\+\s-]*fqdns\s*=\s*\[', line):
+        in_fqdns = True
+        continue
+    if in_fqdns and "]" in line:
+        in_fqdns = False
+        continue
 
-    # Check if inside the exact block path
-    if path == ['tmac-internet', 'app_rules', 'tsac_all']:
-        if line.startswith('+') and not line.startswith('++'):
-            fqdn_match = re.search(r'([a-zA-Z0-9.-]+\.[a-z]{2,})', line)
-            comment_match = re.search(r'#(.*)', line)
-            if fqdn_match:
-                fqdn = fqdn_match.group(1).strip()
-                comment = comment_match.group(1).strip() if comment_match else "No comment"
-                added_fqdns.append((fqdn, comment))
+    if in_fqdns and line.startswith("+") and not line.startswith("++"):
+        cleaned_line = line.lstrip("+").strip()
+        if cleaned_line:
+            added_fqdns.append(cleaned_line)
 
-# Final output
 if added_fqdns:
-    print("✅ Newly added FQDNs in tmac-internet > app_rules > tsac_all > fqdns:")
-    for fqdn, comment in added_fqdns:
-        print(f"- {fqdn} → {comment}")
+    print("✅ Newly added FQDNs (with comments):")
+    for fqdn in added_fqdns:
+        print(fqdn)
 else:
-    print("🟢 No new FQDNs added in the target block.")
+    print("⚠️ No FQDNs were added in tmac-internet > app_rules > tsac_all.")
