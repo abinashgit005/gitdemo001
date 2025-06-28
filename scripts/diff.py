@@ -1,57 +1,53 @@
 import subprocess
+import re
+import json
 from pathlib import Path
 
-diff_file = Path("tfvars_changes/full_diff.txt")
-diff_file.parent.mkdir(exist_ok=True)
+def extract_fqdns_from_file(content: str) -> list[str]:
+    """
+    Extracts the FQDN list from the tmac-internet > app_rules > tsac_all block.
+    """
+    fqdns = []
+    in_tmac = in_app = in_tsac = in_fqdns = False
 
+    for line in content.splitlines():
+        if "tmac-internet" in line:
+            in_tmac = True
+        elif in_tmac and "app_rules" in line:
+            in_app = True
+        elif in_app and "tsac_all" in line:
+            in_tsac = True
+        elif in_tsac and "fqdns" in line and "[" in line:
+            in_fqdns = True
+            continue
+        elif in_fqdns and "]" in line:
+            in_fqdns = False
+            break
+        elif in_fqdns:
+            line = line.strip().rstrip(",")
+            if line:
+                # Remove inline comments and quotes
+                match = re.match(r'"([^"]+)"(?:,)?(?:\s*#\s*(.*))?', line)
+                if match:
+                    fqdn = match.group(1).strip()
+                    comment = match.group(2).strip() if match.group(2) else ""
+                    fqdns.append(fqdn + ("  # " + comment if comment else ""))
+    return fqdns
+
+# Get old and new file versions from git
 try:
-    diff_output = subprocess.check_output(
-        ["git", "diff", "HEAD~1", "HEAD", "--", "demo.tfvars"],
-        text=True
-    )
+    old_content = subprocess.check_output(["git", "show", "HEAD~1:demo.tfvars"], text=True)
+    new_content = subprocess.check_output(["git", "show", "HEAD:demo.tfvars"], text=True)
 except subprocess.CalledProcessError as e:
-    print("❌ git diff failed:", e)
-    diff_output = ""
+    print("❌ Failed to fetch file versions from Git:", e)
+    exit(1)
 
-if not diff_output.strip():
-    print("📭 No diff found in demo.tfvars between last 2 commits.")
-    exit(0)
+old_fqdns = extract_fqdns_from_file(old_content)
+new_fqdns = extract_fqdns_from_file(new_content)
 
-diff_file.write_text(diff_output)
-print("📄 Full git diff:\n", diff_output)
+# Detect added domains
+added_fqdns = [fqdn for fqdn in new_fqdns if fqdn not in old_fqdns]
 
-# 🧠 Fuzzy context-based detection
-block_stack = []
-in_fqdns_block = False
-added_fqdns = []
-
-for line in diff_output.splitlines():
-    stripped = line.strip()
-
-    # Track path in HCL hierarchy by watching context lines
-    if "tmac-internet" in line:
-        block_stack = ["tmac-internet"]
-    elif "app_rules" in line:
-        block_stack.append("app_rules")
-    elif "tsac_all" in line:
-        block_stack.append("tsac_all")
-    elif "fqdns" in line and "[" in line and block_stack == ["tmac-internet", "app_rules", "tsac_all"]:
-        in_fqdns_block = True
-    elif "]" in line and in_fqdns_block:
-        in_fqdns_block = False
-
-    # Smart detection if only inner lines were added
-    if not in_fqdns_block and block_stack == ["tmac-internet", "app_rules", "tsac_all"]:
-        if line.startswith("+") and re.search(r'"[^"]+",\s*#.*', line):
-            # Entering fqdns block implicitly
-            in_fqdns_block = True
-
-    if in_fqdns_block and line.startswith("+") and not line.startswith("++"):
-        cleaned = line.lstrip("+").strip()
-        if cleaned:
-            added_fqdns.append(cleaned)
-
-# Output result
 if added_fqdns:
     print("✅ Newly added FQDNs (with comments):")
     for fqdn in added_fqdns:
