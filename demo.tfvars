@@ -6,7 +6,8 @@ tmac-internet = {
             fqdns = [
                 "abc.com" # added abc
                 "xyz.com" # added xyz
-                "added.com", #added 
+                "added.com", #added
+                "test001.com", test001
             ]
         }
     }
