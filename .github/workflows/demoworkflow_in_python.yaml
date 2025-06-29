@@ -30,3 +30,6 @@ jobs:
         
       - name: Run Python to extract new FQDNs
         run: python3 scripts/diff.py
+
+      - name: Run Python to extract new FQDNs
+        run: python3 scripts/new_update_readme.py
