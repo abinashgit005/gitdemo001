@@ -46,3 +46,6 @@ with open(readme_file, "w") as f:
     f.writelines(lines)
 
 print("✅ README.md updated with new FQDNs.")
+
+print("\n✅ README.md updated. Here's the new content:\n")
+print("".join(lines))
