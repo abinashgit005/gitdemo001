@@ -31,7 +31,7 @@ def extract_fqdns_from_file(content: str) -> list[str]:
                 if match:
                     fqdn = match.group(1).strip()
                     comment = match.group(2).strip() if match.group(2) else ""
-                    fqdns.append(fqdn + ("  # " + comment if comment else ""))
+                    fqdns.append(fqdn + ("  | " + comment if comment else ""))
     return fqdns
 
 # Get old and new file versions from git
