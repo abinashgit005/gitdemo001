@@ -17,6 +17,7 @@ tmac-internet = {
                 "aws.com",      # added aws 
                 "amazon.com",      #amazon added
                 "save.com",    # save file
+                "test005.com", # test005
             ]
         }
     }
