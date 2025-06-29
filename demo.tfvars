@@ -11,6 +11,7 @@ tmac-internet = {
                 "amazon.com",   # amazon added
                 "again.com",   # added again
                 "ghi.com",   # ghi added
+                "aka.com",    # aka added 
             ]
         }
     }

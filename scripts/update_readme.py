@@ -1,52 +1,53 @@
-# update_readme.py
+readme_file = "README.md"
+fqdn_file = "added_fqdns.txt"
 
-section_title = "1.2.1 Default Internet outbound firewall rules"
-readme_path = "README.md"
-fqdn_file = "tfvars_changes/added_fqdns.txt"
-
-# Read new entries
+# Step 1: Read new FQDNs
 try:
     with open(fqdn_file) as f:
-        new_rows = [line.strip().split('|') for line in f if line.strip()]
+        new_lines = []
+        for line in f:
+            if line.strip():
+                fqdn, *comment = [p.strip() for p in line.split("|")]
+                comment = comment[0] if comment else "#"
+                new_line = f"| dev                               |{fqdn:<21}|TCP       | 443  | {comment:<24} |"
+                new_lines.append(new_line.rstrip() + "\n")  # ✅ Ensure newline
 except FileNotFoundError:
-    print("⚠️ No new FQDNs found.")
-    exit(0)
-
-# Load README
-with open(readme_path) as f:
-    lines = f.readlines()
-
-# Find table start (heading + separator)
-start = None
-for i, line in enumerate(lines):
-    if section_title.lower() in line.lower():
-        for j in range(i + 1, len(lines)):
-            if lines[j].startswith('|---'):
-                start = j
-                break
-        break
-
-if start is None:
-    print("❌ Could not find table.")
+    print("❌ 'added_fqdns.txt' not found.")
     exit(1)
 
-# Find where table ends (next non-table line)
-end = start + 1
-while end < len(lines) and lines[end].strip().startswith('|'):
-    end += 1
+# Step 2: Read current README
+with open(readme_file) as f:
+    lines = f.readlines()
 
-# Create padded new rows
-new_lines = [
-    f"| dev                               |{fqdn.strip():<21}|TCP       | 443  | {comment.strip():<24}|\n"
-    for fqdn, comment in new_rows
-]
+# Step 3: Locate the table under section 1.2.1
+start = header = end = None
+for i, line in enumerate(lines):
+    if line.strip().startswith("### 1.2.1 Default Internet outbound firewall rules"):
+        start = i
+    if start is not None and "| From" in line:
+        header = i
+    if header is not None and "---" in line:
+        # Find where table rows stop
+        for j in range(i + 1, len(lines)):
+            if not lines[j].startswith("|"):
+                end = j
+                break
+        else:
+            end = len(lines)
+        break
 
-# Insert at end of table
+# Validate detection
+if start is None or header is None or end is None:
+    print("❌ Could not locate the firewall table section.")
+    exit(1)
+
+# Step 4: Insert new lines after the last table row
 lines = lines[:end] + new_lines + lines[end:]
 
-# Save and print
-with open(readme_path, "w") as f:
+# Step 5: Write updated README
+with open(readme_file, "w") as f:
     f.writelines(lines)
 
+# Step 6: Print the updated README content
 print("\n✅ README.md updated. Here's the new content:\n")
 print("".join(lines))
