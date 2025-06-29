@@ -9,18 +9,17 @@ try:
             if line.strip():
                 fqdn, *comment = [p.strip() for p in line.split("|")]
                 comment = comment[0] if comment else "#"
-                new_lines.append(
-                    f"| dev                               |{fqdn:<21}|TCP       | 443  | {comment:<24} |"
-                )
+                new_line = f"| dev                               |{fqdn:<21}|TCP       | 443  | {comment:<24} |"
+                new_lines.append(new_line.rstrip() + "\n")  # Ensure newline
 except FileNotFoundError:
     print("❌ 'added_fqdns.txt' not found.")
     exit(1)
 
-# Step 2: Read README.md
+# Step 2: Read current README
 with open(readme_file) as f:
     lines = f.readlines()
 
-# Step 3: Locate the start and end of the actual table
+# Step 3: Locate the table under section 1.2.1
 start = header = end = None
 for i, line in enumerate(lines):
     if line.strip().startswith("### 1.2.1 Default Internet outbound firewall rules"):
@@ -28,7 +27,7 @@ for i, line in enumerate(lines):
     if start is not None and "| From" in line:
         header = i
     if header is not None and "---" in line:
-        # Find the last table row
+        # Find where table rows stop
         for j in range(i + 1, len(lines)):
             if not lines[j].startswith("|"):
                 end = j
@@ -37,17 +36,22 @@ for i, line in enumerate(lines):
             end = len(lines)
         break
 
+# Validation check
 if start is None or header is None or end is None:
     print("❌ Could not locate the firewall table section.")
     exit(1)
 
-# Step 4: Insert new lines at the end of the table
-lines = lines[:end] + [line + "\n" for line in new_lines] + lines[end:]
+# ✅ Fix: Ensure last row ends with newline
+if not lines[end - 1].endswith("\n"):
+    lines[end - 1] += "\n"
 
-# Step 5: Write back to README.md
+# Step 4: Insert new FQDN lines
+lines = lines[:end] + new_lines + lines[end:]
+
+# Step 5: Write back updated README
 with open(readme_file, "w") as f:
     f.writelines(lines)
 
-# Step 6: Print final README
+# Step 6: Print final result
 print("\n✅ README.md updated. Here's the new content:\n")
 print("".join(lines))

@@ -12,6 +12,7 @@ tmac-internet = {
                 "again.com",   # added again
                 "ghi.com",   # ghi added
                 "aka.com",    # aka added 
+                "okay.com" # added okay
             ]
         }
     }
