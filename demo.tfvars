@@ -7,17 +7,6 @@ tmac-internet = {
                 "abc.com" # added abc
                 "xyz.com" # added xyz
                 "added.com", #added
-                "test001.com", test001
-                "test002.com", # test002 added
-                "test003.com", # test003 added 
-                "mytest004.com",        # mytest004 added
-                "my check.com",      # added my check
-                "aka.com",              #added aka
-                "gcp.com",    # added gcp
-                "aws.com",      # added aws 
-                "amazon.com",      #amazon added
-                "save.com",    # save file
-                "test005.com", # test005
                 "update.com", # update
             ]
         }
