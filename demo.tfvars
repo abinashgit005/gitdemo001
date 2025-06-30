@@ -13,6 +13,7 @@ tmac-internet = {
                 "ghi.com",   # ghi added
                 "aka.com",    # aka added 
                 "okay.com" # added okay
+                "gcp.com"   # added gcp for test
             ]
         }
     }
