@@ -31,5 +31,10 @@ jobs:
       - name: Run Python to extract new FQDNs
         run: python3 scripts/diff.py
 
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          repository: 'gitdemo002'
+
       - name: Run Python to extract new FQDNs
         run: python3 scripts/new_update_readme.py
