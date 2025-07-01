@@ -1,0 +1,18 @@
+- name: 🛠 Setup SSH for Git push
+  run: |
+    mkdir -p ~/.ssh
+    echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+    chmod 600 ~/.ssh/id_ed25519
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+- name: 🔁 Clone and Push to Target Repo
+  run: |
+    git clone git@github.com:your-user/demo002.git
+    cd demo002
+    git checkout -B update_fqdn
+    # (Make changes like updating README)
+    git config user.name "github-actions"
+    git config user.email "actions@github.com"
+    git add .
+    git commit -m "update readme with new FQDNs" || echo "No changes"
+    git push origin update_fqdn
