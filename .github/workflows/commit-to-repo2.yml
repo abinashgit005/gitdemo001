@@ -1,0 +1,59 @@
+name: Commit to repository2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install @octokit/core @octokit/auth-app
+
+      - name: Generate GitHub App Token
+        id: generate_token
+        run: |
+          node <<EOF
+          const { createAppAuth } = require("@octokit/auth-app");
+          const { Octokit } = require("@octokit/core");
+
+          const auth = createAppAuth({
+            appId: process.env.APP_ID,
+            privateKey: process.env.APP_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            installationId: process.env.INSTALLATION_ID,
+          });
+
+          auth({ type: "installation" }).then(result => {
+            console.log("::add-mask::" + result.token);
+            console.log("::set-output name=token::" + result.token);
+          });
+          EOF
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          INSTALLATION_ID: ${{ secrets.INSTALLATION_ID }}
+
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.REPO2 }}
+          token: ${{ steps.generate_token.outputs.token }}
+          path: repo2
+
+      - name: Commit and push to repository2
+        run: |
+          cd repo2
+          echo "Updated at $(date)" >> sync.log
+          git config user.name "repo-sync-bot[bot]"
+          git config user.email "repo-sync-bot[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: sync from repository1"
+          git push
