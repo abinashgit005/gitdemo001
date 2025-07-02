@@ -51,9 +51,34 @@ jobs:
       - name: Commit and push to repository2
         run: |
           cd repo2
+          branch_name=sync-update-$(date +%s)
+          git checkout -b $branch_name
           echo "Updated at $(date)" >> sync.log
           git config user.name "repo-sync-bot[bot]"
           git config user.email "repo-sync-bot[bot]@users.noreply.github.com"
           git add .
           git commit -m "chore: sync from repository1"
           git push
+
+      - name: Create Pull Request
+        run: |
+          node <<EOF
+          const { Octokit } = require("@octokit/core");
+
+          const token = "${{ steps.generate_token.outputs.token }}";
+          const octokit = new Octokit({ auth: token });
+
+          const [owner, repo] = "${{ secrets.REPO2 }}".split("/");
+          const branch = process.env.branch_name;
+
+          octokit.request('POST /repos/{owner}/{repo}/pulls', {
+            owner,
+            repo,
+            title: "chore: sync from repository1",
+            head: branch,
+            base: "main", // or your default branch
+            body: "Automated PR from repository1"
+          }).then(res => {
+            console.log("Pull request created:", res.data.html_url);
+          });
+          EOF
